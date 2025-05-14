@@ -1,0 +1,82 @@
+Database Tables
+
+--Jobs Table (Stores job postings)
+
+CREATE TABLE Jobs (
+    job_id INT PRIMARY KEY,
+    job_title VARCHAR(100),
+    job_description TEXT,
+    company_id INT,
+    location VARCHAR(100),
+    salary DECIMAL(10, 2),
+    posted_date DATE
+);
+
+
+--Companies Table (Stores company information)
+
+CREATE TABLE Companies (
+    company_id INT PRIMARY KEY,
+    company_name VARCHAR(100),
+    industry VARCHAR(50),
+    location VARCHAR(100),
+    contact_email VARCHAR(100)
+);
+
+--Applicants Table (Stores applicant details)
+
+CREATE TABLE Applicants (
+    applicant_id INT PRIMARY KEY,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    email VARCHAR(100),
+    phone VARCHAR(20),
+    resume_url TEXT
+);
+
+--Resumes Table (Stores resume information, can be linked to applicants)
+
+CREATE TABLE Resumes (
+    resume_id INT PRIMARY KEY,
+    applicant_id INT,
+    resume_url TEXT,
+    upload_date DATE,
+    FOREIGN KEY (applicant_id) REFERENCES Applicants(applicant_id)
+);
+
+--Interviews Table (Tracks interview process for applicants)
+
+CREATE TABLE Interviews (
+    interview_id INT PRIMARY KEY,
+    applicant_id INT,
+    job_id INT,
+    interview_date DATE,
+    interview_feedback TEXT,
+    interview_status VARCHAR(50), -- e.g., "Scheduled", "Completed", "Offer Made"
+    FOREIGN KEY (applicant_id) REFERENCES Applicants(applicant_id),
+    FOREIGN KEY (job_id) REFERENCES Jobs(job_id)
+);
+
+
+------------------------------------------------------------------------------------------------------------
+Sample SQL Queries
+
+1. Track Applicants for a Specific Job
+-> SELECT a.first_name, a.last_name, a.email, i.interview_status
+   FROM Applicants a
+   JOIN Interviews i ON a.applicant_id = i.applicant_id
+   WHERE i.job_id = 101 -- Specify the job ID you want to track
+   ORDER BY i.interview_date DESC;
+
+2. Get Job Postings by Company
+-> SELECT j.job_title, j.location, j.salary, c.company_name
+   FROM Jobs j
+   JOIN Companies c ON j.company_id = c.company_id
+   WHERE c.company_name = 'Tech Solutions';  -- Specify the company name
+   
+3. Get Interview Status and Feedback for Applicants
+-> SELECT a.first_name, a.last_name, j.job_title, i.interview_status, i.interview_feedback
+   FROM Applicants a
+   JOIN Interviews i ON a.applicant_id = i.applicant_id
+   JOIN Jobs j ON i.job_id = j.job_id
+   WHERE i.interview_status = 'Completed';
