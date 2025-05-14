@@ -23,4 +23,42 @@ CREATE TABLE CovidStats (
     FOREIGN KEY (iso_code) REFERENCES Countries(iso_code)
 );
 
+-------------------------------------------------------------------------------------------------------------------
+
+ * Sample Queries
+
+1. Total Cases by Continent
+-> SELECT continent, SUM(total_cases) AS total_cases
+   FROM CovidStats JOIN Countries USING(iso_code)
+   WHERE date = '2021-12-31'
+   GROUP BY continent;
+
+2. Top 5 Countries by New Cases
+-> SELECT location, new_cases
+   FROM CovidStats JOIN Countries USING(iso_code)
+   WHERE date = '2021-12-31'
+   ORDER BY new_cases DESC
+   LIMIT 5;
+
+3. Monthly Growth of Cases
+-> SELECT iso_code, DATE_TRUNC('month', date) AS month,
+   MAX(total_cases) - MIN(total_cases) AS growth
+   FROM CovidStats
+   GROUP BY iso_code, month;
+
+4. Vaccination Rate
+-> SELECT location,
+   MAX(total_vaccinations) * 100.0 / MAX(population) AS vaccination_rate
+   FROM CovidStats JOIN Countries USING(iso_code)
+   GROUP BY location
+   ORDER BY vaccination_rate DESC;
+
+5. 7-Day Rolling Average (New Cases)
+-> SELECT iso_code, date, new_cases,
+   AVG(new_cases) OVER (PARTITION BY iso_code ORDER BY date ROWS 6 PRECEDING) AS avg_7d
+  FROM CovidStats;
+
+
+
+
 
